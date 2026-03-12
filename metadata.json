@@ -1,0 +1,9 @@
+{
+  "name": "Missão Tech - Command Center",
+  "description": "Painel administrativo estratégico para o laboratório de inovação política do Partido Missão.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}

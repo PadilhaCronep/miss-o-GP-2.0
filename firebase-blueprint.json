@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "Potencial voluntário capturado via formulário.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nome completo" },
+        "email": { "type": "string", "format": "email", "description": "E-mail de contato" },
+        "city": { "type": "string", "description": "Cidade/Estado" },
+        "availability": { "type": "string", "description": "Disponibilidade semanal" },
+        "area": { "type": "string", "description": "Área de atuação principal" },
+        "experienceLevel": { "type": "string", "enum": ["Júnior", "Pleno", "Sênior"], "description": "Nível de experiência" },
+        "experienceTime": { "type": "string", "description": "Tempo de experiência" },
+        "technologies": { "type": "string", "description": "Tecnologias dominadas" },
+        "linkedin": { "type": "string", "format": "uri", "description": "Link do LinkedIn" },
+        "github": { "type": "string", "format": "uri", "description": "Link do GitHub/Portfólio" },
+        "previousProjects": { "type": "string", "description": "Projetos anteriores relevantes" },
+        "motivation": { "type": "string", "description": "Motivação para participar" },
+        "status": { "type": "string", "enum": ["novo", "em análise", "qualificado", "contato realizado", "aprovado", "reprovado", "arquivado"], "description": "Status do lead" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Data de criação" }
+      },
+      "required": ["name", "email", "area", "status", "createdAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Projeto desenvolvido pelo laboratório.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["rascunho", "em desenvolvimento", "publicado", "arquivado"] },
+        "featured": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "slug", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "leads": {
+      "schema": "Lead",
+      "description": "Coleção de leads capturados."
+    },
+    "projects": {
+      "schema": "Project",
+      "description": "Coleção de projetos do laboratório."
+    }
+  }
+}
