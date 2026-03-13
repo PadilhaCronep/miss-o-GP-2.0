@@ -1,6 +1,7 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { ArrowRight, Terminal, Code2, Users, Zap, Cpu, Layers, Target } from 'lucide-react';
 import { projects, team, labStats } from '@/lib/data';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
 import * as motion from 'motion/react-client';
 
 export default function Home() {
@@ -23,7 +24,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#FFD600]/30 bg-[#FFD600]/10 text-[#FFD600] text-xs font-mono mb-8"
             >
               <span className="w-2 h-2 rounded-full bg-[#FFD600] animate-pulse" />
-              MISSÃO TECH LAB // STATUS: OPERACIONAL
+              MISSÃƒO TECH LAB // STATUS: OPERACIONAL
             </motion.div>
             
             <motion.h1 
@@ -32,7 +33,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-6xl md:text-8xl font-display font-bold tracking-tighter leading-[0.9] mb-8 text-white"
             >
-              O FUTURO É <br />
+              O FUTURO Ã‰ <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFD600] to-[#FFEA00]">
                 GLORIOSO.
               </span>
@@ -44,7 +45,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-xl md:text-2xl text-zinc-400 max-w-3xl font-light leading-relaxed mb-12"
             >
-              Núcleo tecnológico estratégico e centro de desenvolvimento digital. Unimos <strong className="text-white font-medium">imaginação, estratégia, engenharia, organização e tecnologia</strong> para construir o ecossistema da nova política.
+              NÃºcleo tecnolÃ³gico estratÃ©gico e centro de desenvolvimento digital. Unimos <strong className="text-white font-medium">imaginaÃ§Ã£o, estratÃ©gia, engenharia, organizaÃ§Ã£o e tecnologia</strong> para construir o ecossistema da nova polÃ­tica.
             </motion.p>
             
             <motion.div 
@@ -57,13 +58,13 @@ export default function Home() {
                 href="/projetos" 
                 className="h-14 px-8 bg-[#FFD600] text-black font-semibold rounded-sm flex items-center gap-2 hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
               >
-                Explorar o Laboratório <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                Explorar o LaboratÃ³rio <ArrowRight className="w-5 h-5" aria-hidden="true" />
               </Link>
               <Link 
                 href="/participe" 
                 className="h-14 px-8 bg-transparent border border-white/20 text-white font-semibold rounded-sm flex items-center gap-2 hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD600] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
               >
-                Faça parte da Equipe
+                FaÃ§a parte da Equipe
               </Link>
             </motion.div>
           </div>
@@ -78,20 +79,20 @@ export default function Home() {
           aria-hidden="true"
         >
           <div className="writing-vertical-rl rotate-180 text-xs font-mono text-zinc-600 tracking-[0.2em]">
-            LABORATÓRIO ESTRATÉGICO // V.2.0.0
+            LABORATÃ“RIO ESTRATÃ‰GICO // V.2.0.0
           </div>
         </motion.div>
       </section>
 
       {/* Metrics Section */}
-      <section className="border-y border-white/10 bg-[#0A0A0A]" aria-label="Métricas do Laboratório">
+      <section className="border-y border-white/10 bg-[#0A0A0A]" aria-label="MÃ©tricas do LaboratÃ³rio">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/10">
             {[
               { label: 'Projetos Desenvolvidos', value: labStats.projectsCompleted, icon: Terminal },
-              { label: 'Voluntários Ativos', value: labStats.activeVolunteers, icon: Users },
-              { label: 'Linhas de Código', value: labStats.linesOfCode, icon: Code2 },
-              { label: 'Usuários Impactados', value: labStats.impactedUsers, icon: Zap },
+              { label: 'VoluntÃ¡rios Ativos', value: labStats.activeVolunteers, icon: Users },
+              { label: 'Linhas de CÃ³digo', value: labStats.linesOfCode, icon: Code2 },
+              { label: 'UsuÃ¡rios Impactados', value: labStats.impactedUsers, icon: Zap },
             ].map((stat, i) => (
               <motion.div 
                 key={i} 
@@ -102,7 +103,7 @@ export default function Home() {
                 className="p-8 flex flex-col items-center text-center hover:bg-white/[0.02] transition-colors"
               >
                 <stat.icon className="w-6 h-6 text-[#FFD600] mb-4 opacity-80" aria-hidden="true" />
-                <span className="text-4xl font-display font-bold text-white mb-2">{stat.value}</span>
+                <span className="text-4xl font-display font-bold text-white mb-2"><AnimatedCounter value={stat.value} /></span>
                 <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">{stat.label}</span>
               </motion.div>
             ))}
@@ -121,7 +122,7 @@ export default function Home() {
               transition={{ duration: 0.5 }}
             >
               <h2 id="featured-projects-title" className="text-4xl md:text-5xl font-display font-bold mb-4">Projetos em Destaque</h2>
-              <p className="text-zinc-400 font-mono text-sm">O que estamos construindo no laboratório.</p>
+              <p className="text-zinc-400 font-mono text-sm">O que estamos construindo no laboratÃ³rio.</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -215,10 +216,10 @@ export default function Home() {
                 <Terminal className="w-4 h-4" /> System.Logs
               </h2>
               <h3 className="text-4xl md:text-5xl font-display font-bold mb-6">
-                O laboratório nunca para.
+                O laboratÃ³rio nunca para.
               </h3>
               <p className="text-zinc-400 text-lg leading-relaxed mb-8">
-                Acompanhe o pulso da nossa equipe. Deploys em produção, novas features, marcos de usuários e atualizações de infraestrutura acontecendo em tempo real.
+                Acompanhe o pulso da nossa equipe. Deploys em produÃ§Ã£o, novas features, marcos de usuÃ¡rios e atualizaÃ§Ãµes de infraestrutura acontecendo em tempo real.
               </p>
               <Link 
                 href="/projetos" 
@@ -249,7 +250,7 @@ export default function Home() {
               <div className="p-6 font-mono text-xs md:text-sm space-y-4 h-[320px] overflow-y-auto custom-scrollbar">
                 <div className="flex gap-3 text-zinc-400">
                   <span className="text-emerald-400 shrink-0">[10:42:05]</span>
-                  <span><span className="text-blue-400">INFO</span>: Deploying Impixômetro v2.1.0 to production...</span>
+                  <span><span className="text-blue-400">INFO</span>: Deploying ImpixÃ´metro v2.1.0 to production...</span>
                 </div>
                 <div className="flex gap-3 text-zinc-400">
                   <span className="text-emerald-400 shrink-0">[10:42:12]</span>
@@ -261,7 +262,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-3 text-zinc-400">
                   <span className="text-emerald-400 shrink-0">[13:00:00]</span>
-                  <span><span className="text-[#FFD600]">METRIC</span>: Missão Space reached 150,000 monthly active users.</span>
+                  <span><span className="text-[#FFD600]">METRIC</span>: MissÃ£o Space reached 150,000 monthly active users.</span>
                 </div>
                 <div className="flex gap-3 text-zinc-400">
                   <span className="text-emerald-400 shrink-0">[14:22:10]</span>
@@ -294,18 +295,18 @@ export default function Home() {
             >
               <h2 className="text-sm font-mono text-[#FFD600] uppercase tracking-widest mb-4">Nosso DNA</h2>
               <h3 className="text-4xl md:text-5xl font-display font-bold mb-8 leading-tight">
-                Não somos uma agência.<br />
-                Somos um <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFD600] to-[#FFEA00]">Laboratório</span>.
+                NÃ£o somos uma agÃªncia.<br />
+                Somos um <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFD600] to-[#FFEA00]">LaboratÃ³rio</span>.
               </h3>
               <p className="text-zinc-400 text-lg leading-relaxed mb-8">
-                Acreditamos que a política precisa de mais do que discursos; precisa de infraestrutura, dados e ferramentas que conectem o cidadão ao poder público de forma real.
+                Acreditamos que a polÃ­tica precisa de mais do que discursos; precisa de infraestrutura, dados e ferramentas que conectem o cidadÃ£o ao poder pÃºblico de forma real.
               </p>
               
               <ul className="space-y-6">
                 {[
-                  { title: 'Núcleo Estratégico', desc: 'Desenvolvemos tecnologia proprietária e estratégica para o ecossistema político.' },
-                  { title: 'Engenharia de Precisão', desc: 'Sistemas complexos construídos com rigor técnico e organização avançada.' },
-                  { title: 'Design de Impacto', desc: 'A experiência do usuário como ferramenta de autoridade e mobilização política.' }
+                  { title: 'NÃºcleo EstratÃ©gico', desc: 'Desenvolvemos tecnologia proprietÃ¡ria e estratÃ©gica para o ecossistema polÃ­tico.' },
+                  { title: 'Engenharia de PrecisÃ£o', desc: 'Sistemas complexos construÃ­dos com rigor tÃ©cnico e organizaÃ§Ã£o avanÃ§ada.' },
+                  { title: 'Design de Impacto', desc: 'A experiÃªncia do usuÃ¡rio como ferramenta de autoridade e mobilizaÃ§Ã£o polÃ­tica.' }
                 ].map((item, i) => (
                   <motion.li 
                     key={i} 
@@ -367,9 +368,9 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="text-5xl md:text-7xl font-display font-bold mb-8"
           >
-            Faça parte da <br />
+            FaÃ§a parte da <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFD600] to-[#FFEA00]">
-              Revolução
+              RevoluÃ§Ã£o
             </span>
           </motion.h2>
           <motion.p 
@@ -379,7 +380,7 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-xl text-zinc-400 mb-12 max-w-2xl mx-auto font-light"
           >
-            Buscamos talentos técnicos para integrar nossa equipe coordenada. Colabore em projetos de alta complexidade e desenvolva seu portfólio no centro da inovação política.
+            Buscamos talentos tÃ©cnicos para integrar nossa equipe coordenada. Colabore em projetos de alta complexidade e desenvolva seu portfÃ³lio no centro da inovaÃ§Ã£o polÃ­tica.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -391,7 +392,7 @@ export default function Home() {
               href="/participe" 
               className="inline-flex h-16 px-10 bg-white text-black font-bold text-lg rounded-sm items-center gap-3 hover:bg-[#FFD600] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
             >
-              Quero ser Voluntário <ArrowRight className="w-6 h-6" aria-hidden="true" />
+              Quero ser VoluntÃ¡rio <ArrowRight className="w-6 h-6" aria-hidden="true" />
             </Link>
           </motion.div>
         </div>
@@ -399,3 +400,4 @@ export default function Home() {
     </div>
   );
 }
+

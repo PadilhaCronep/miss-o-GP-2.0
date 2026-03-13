@@ -1,146 +1,169 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  GripVertical,
-  FolderKanban,
-  FileText,
-  Users,
-  Settings,
-  ChevronRight,
-  Tag
-} from 'lucide-react';
-import { motion, Reorder } from 'framer-motion';
+import { useMemo, useState } from 'react';
+import { Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useAdmin } from '@/components/admin/admin-provider';
+import { EmptyState, Panel, SectionHeader } from '@/components/admin/ui';
 
-// Mock data for categories
-const initialCategories = [
-  { id: '1', name: 'Eleitoral', description: 'Tecnologias voltadas para campanhas e processos eleitorais.', count: 8, color: '#FFD600' },
-  { id: '2', name: 'Transparência', description: 'Projetos de abertura de dados e fiscalização pública.', count: 5, color: '#2979FF' },
-  { id: '3', name: 'Mobilização', description: 'Ferramentas para engajamento de voluntários e militância.', count: 12, color: '#00E676' },
-  { id: '4', name: 'Comunicação', description: 'Plataformas de difusão de conteúdo e estratégia digital.', count: 4, color: '#FF3D00' },
-  { id: '5', name: 'Interno', description: 'Ferramentas de gestão e infraestrutura do laboratório.', count: 3, color: '#AA00FF' },
-];
+type TabKind = 'categories' | 'objectives' | 'tags';
 
 export default function AdminCategoriasPage() {
-  const [categories, setCategories] = useState(initialCategories);
-  const [searchTerm, setSearchTerm] = useState('');
+  const { db, upsertTaxonomyItem, deleteTaxonomyItem } = useAdmin();
+  const [tab, setTab] = useState<TabKind>('categories');
+  const [query, setQuery] = useState('');
+  const [editing, setEditing] = useState<{ id?: string; name: string; description?: string } | null>(null);
 
-  const filteredCategories = categories.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const list = useMemo(() => {
+    const source = db[tab];
+    return source.filter((item: any) =>
+      `${item.name} ${item.description || ''}`.toLowerCase().includes(query.toLowerCase()),
+    );
+  }, [db, query, tab]);
+
+  const titleMap: Record<TabKind, string> = {
+    categories: 'Categorias de projeto',
+    objectives: 'Objetivos estrategicos',
+    tags: 'Tags funcionais',
+  };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-display font-bold tracking-tighter">CATEGORIAS</h1>
-          <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest mt-1">Organização estrutural do ecossistema</p>
-        </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-[#FFD600] text-black font-bold text-xs font-mono hover:bg-[#FFD600]/90 transition-all rounded-sm">
-          <Plus className="w-4 h-4" /> NOVA CATEGORIA
-        </button>
-      </div>
+    <div className="space-y-6">
+      <SectionHeader
+        title="Gestao de Taxonomia"
+        subtitle="Mantenha categorias, objetivos e tags que estruturam o catalogo de projetos"
+        actions={
+          <button
+            onClick={() => setEditing({ name: '', description: '' })}
+            className="h-10 px-4 rounded-sm bg-[#FFD600] text-black hover:bg-white font-semibold text-sm inline-flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Novo item
+          </button>
+        }
+      />
 
-      {/* Controls */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-[#0A0A0A] border border-white/10 p-4 rounded-sm">
-        <div className="flex items-center gap-4 flex-grow max-w-md">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-            <input 
-              type="text" 
-              placeholder="Buscar categorias..." 
-              className="w-full bg-black border border-white/10 pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#FFD600] rounded-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <Panel className="space-y-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {(['categories', 'objectives', 'tags'] as TabKind[]).map((item) => (
+            <button
+              key={item}
+              onClick={() => setTab(item)}
+              className={`h-9 px-3 rounded-sm text-sm border transition-colors ${
+                tab === item
+                  ? 'bg-[#FFD600] text-black border-[#FFD600]'
+                  : 'bg-white/5 border-white/10 text-zinc-300 hover:bg-white/10'
+              }`}
+            >
+              {titleMap[item]}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full md:max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={`Buscar em ${titleMap[tab].toLowerCase()}`}
+            className="w-full h-10 rounded-sm border border-white/10 bg-black/40 pl-9 pr-3 text-sm outline-none focus:border-[#FFD600]/60"
+          />
+        </div>
+
+        {list.length === 0 ? (
+          <EmptyState title="Nenhum item encontrado" description="Crie novos itens para estruturar filtros e classificacoes." />
+        ) : (
+          <div className="space-y-2">
+            {list.map((item: any) => (
+              <div key={item.id} className="rounded-sm border border-white/10 bg-black/20 p-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium">{item.name}</p>
+                  {'description' in item && item.description ? (
+                    <p className="text-xs text-zinc-500 mt-1">{item.description}</p>
+                  ) : null}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditing({ id: item.id, name: item.name, description: item.description || '' })}
+                    className="h-8 w-8 inline-flex items-center justify-center rounded-sm border border-white/10 hover:bg-white/10"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => deleteTaxonomyItem(tab, item.id)}
+                    className="h-8 w-8 inline-flex items-center justify-center rounded-sm border border-white/10 hover:bg-rose-500/20 hover:text-rose-300"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
+        )}
+      </Panel>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Categories List */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-[#0A0A0A] border border-white/10 rounded-sm overflow-hidden">
-            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Ordem / Nome</span>
-              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Projetos / Ações</span>
-            </div>
-            
-            <div className="divide-y divide-white/5">
-              {filteredCategories.map((category) => (
-                <div key={category.id} className="p-4 flex items-center justify-between group hover:bg-white/5 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <GripVertical className="w-4 h-4 text-zinc-700 cursor-grab active:cursor-grabbing" />
-                    <div 
-                      className="w-1 h-8 rounded-full" 
-                      style={{ backgroundColor: category.color }} 
+      <AnimatePresence>
+        {editing ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80]"
+          >
+            <button className="absolute inset-0 bg-black/75" onClick={() => setEditing(null)} />
+            <motion.div
+              initial={{ opacity: 0, y: 16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.98 }}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(520px,92vw)] rounded-sm border border-white/10 bg-[#0A0A0A] p-5"
+            >
+              <h3 className="text-lg font-semibold mb-4">{editing.id ? 'Editar item' : 'Novo item'}</h3>
+              <form
+                className="space-y-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  upsertTaxonomyItem(tab, editing);
+                  setEditing(null);
+                }}
+              >
+                <label className="space-y-1 block">
+                  <span className="text-xs text-zinc-500">Nome</span>
+                  <input
+                    type="text"
+                    value={editing.name}
+                    onChange={(e) => setEditing((prev) => ({ ...(prev as any), name: e.target.value }))}
+                    className="w-full h-10 rounded-sm border border-white/10 bg-black/40 px-3 text-sm"
+                  />
+                </label>
+
+                {tab !== 'tags' ? (
+                  <label className="space-y-1 block">
+                    <span className="text-xs text-zinc-500">Descricao</span>
+                    <textarea
+                      rows={3}
+                      value={editing.description || ''}
+                      onChange={(e) => setEditing((prev) => ({ ...(prev as any), description: e.target.value }))}
+                      className="w-full rounded-sm border border-white/10 bg-black/40 px-3 py-2 text-sm"
                     />
-                    <div>
-                      <h4 className="text-sm font-bold group-hover:text-[#FFD600] transition-colors">{category.name}</h4>
-                      <p className="text-[10px] text-zinc-500 max-w-md truncate">{category.description}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-8">
-                    <div className="text-right">
-                      <p className="text-xs font-bold">{category.count}</p>
-                      <p className="text-[9px] font-mono text-zinc-500 uppercase">Projetos</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="p-2 hover:bg-white/10 rounded-sm transition-colors text-zinc-500 hover:text-white">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 hover:bg-white/10 rounded-sm transition-colors text-zinc-500 hover:text-red-400">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <p className="text-[10px] text-zinc-500 font-mono italic">
-            * Arraste as categorias para reordenar a exibição no site público.
-          </p>
-        </div>
+                  </label>
+                ) : null}
 
-        {/* Quick Stats / Info */}
-        <div className="space-y-6">
-          <div className="bg-[#0A0A0A] border border-white/10 p-6 rounded-sm">
-            <h3 className="text-lg font-bold mb-4">Resumo de Estrutura</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-white/5 rounded-sm">
-                <div className="flex items-center gap-3">
-                  <Tag className="w-4 h-4 text-[#FFD600]" />
-                  <span className="text-xs">Total de Categorias</span>
+                <div className="flex justify-end gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(null)}
+                    className="h-10 px-4 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  <button type="submit" className="h-10 px-4 rounded-sm bg-[#FFD600] text-black hover:bg-white font-semibold text-sm">
+                    Salvar
+                  </button>
                 </div>
-                <span className="text-sm font-bold">{categories.length}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-white/5 rounded-sm">
-                <div className="flex items-center gap-3">
-                  <FolderKanban className="w-4 h-4 text-blue-400" />
-                  <span className="text-xs">Projetos Categorizados</span>
-                </div>
-                <span className="text-sm font-bold">32</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[#FFD600]/5 border border-[#FFD600]/20 p-6 rounded-sm">
-            <h3 className="text-sm font-bold text-[#FFD600] mb-2 flex items-center gap-2">
-              <Settings className="w-4 h-4" /> Dica de Organização
-            </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Mantenha as categorias concisas e autoexplicativas. Elas são usadas para filtrar projetos no portfólio e organizar a equipe interna.
-            </p>
-          </div>
-        </div>
-      </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

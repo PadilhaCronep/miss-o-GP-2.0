@@ -1,325 +1,297 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
-import { 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Mail, 
-  Linkedin, 
-  Github, 
-  Download,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Eye
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useMemo, useState } from 'react';
+import { Download, Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useAdmin } from '@/components/admin/admin-provider';
+import { EmptyState, LeadStatusBadge, Panel, SectionHeader } from '@/components/admin/ui';
+import type { Lead, LeadStatus } from '@/lib/admin/types';
 
-const mockLeads = [
-  { 
-    id: '1', 
-    name: 'Carlos Oliveira', 
-    email: 'carlos.o@email.com', 
-    area: 'Front-end', 
-    experience: 'Sênior', 
-    status: 'Novo', 
-    date: '12/03/2026',
-    city: 'São Paulo, SP',
-    techs: ['React', 'Next.js', 'Tailwind'],
-    motivation: 'Quero contribuir com tecnologia para impacto político.'
-  },
-  { 
-    id: '2', 
-    name: 'Ana Souza', 
-    email: 'ana.souza@email.com', 
-    area: 'Dados', 
-    experience: 'Pleno', 
-    status: 'Em análise', 
-    date: '11/03/2026',
-    city: 'Rio de Janeiro, RJ',
-    techs: ['Python', 'SQL', 'PowerBI'],
-    motivation: 'Interesse em análise de dados eleitorais.'
-  },
-  { 
-    id: '3', 
-    name: 'Marcos Silva', 
-    email: 'marcos.s@email.com', 
-    area: 'Back-end', 
-    experience: 'Sênior', 
-    status: 'Qualificado', 
-    date: '10/03/2026',
-    city: 'Belo Horizonte, MG',
-    techs: ['Node.js', 'Go', 'PostgreSQL'],
-    motivation: 'Experiência em sistemas escaláveis.'
-  },
-  { 
-    id: '4', 
-    name: 'Julia Costa', 
-    email: 'julia.c@email.com', 
-    area: 'Design', 
-    experience: 'Júnior', 
-    status: 'Novo', 
-    date: '10/03/2026',
-    city: 'Curitiba, PR',
-    techs: ['Figma', 'Adobe XD'],
-    motivation: 'Busco experiência em projetos reais.'
-  },
-  { 
-    id: '5', 
-    name: 'Ricardo Lima', 
-    email: 'r.lima@email.com', 
-    area: 'DevOps', 
-    experience: 'Sênior', 
-    status: 'Aprovado', 
-    date: '09/03/2026',
-    city: 'Brasília, DF',
-    techs: ['Docker', 'K8s', 'AWS'],
-    motivation: 'Apoio à infraestrutura do laboratório.'
-  },
-];
+const statusOptions: LeadStatus[] = ['novo', 'em_analise', 'qualificado', 'aprovado', 'rejeitado', 'arquivado'];
 
-export default function LeadsPage() {
-  const [selectedLead, setSelectedLead] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('Todos');
+const emptyLead: Partial<Lead> = {
+  name: '',
+  email: '',
+  city: '',
+  area: '',
+  technologies: [],
+  experienceLevel: '',
+  availability: '',
+  motivation: '',
+  github: '',
+  linkedin: '',
+  notes: '',
+  status: 'novo',
+};
 
-  const filteredLeads = mockLeads.filter(lead => {
-    const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         lead.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'Todos' || lead.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
+function toCsvRow(columns: string[]) {
+  return columns.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(',');
+}
+
+export default function AdminLeadsPage() {
+  const { db, upsertLead, updateLeadStatus, deleteLead } = useAdmin();
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'todos' | LeadStatus>('todos');
+  const [editing, setEditing] = useState<any | null>(null);
+
+  const leads = useMemo(
+    () =>
+      db.leads.filter((lead) => {
+        const matchQuery =
+          lead.name.toLowerCase().includes(query.toLowerCase()) ||
+          lead.email.toLowerCase().includes(query.toLowerCase()) ||
+          lead.area.toLowerCase().includes(query.toLowerCase());
+        const matchStatus = statusFilter === 'todos' || lead.status === statusFilter;
+        return matchQuery && matchStatus;
+      }),
+    [db.leads, query, statusFilter],
+  );
+
+  const exportCsv = () => {
+    const header = ['nome', 'email', 'cidade', 'area', 'tecnologias', 'nivel', 'status', 'disponibilidade'];
+    const rows = db.leads.map((lead) =>
+      toCsvRow([
+        lead.name,
+        lead.email,
+        lead.city,
+        lead.area,
+        lead.technologies.join(' | '),
+        lead.experienceLevel,
+        lead.status,
+        lead.availability,
+      ]),
+    );
+    const csv = [toCsvRow(header), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'leads-missao-lab.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-display font-bold tracking-tighter">LEADS</h1>
-          <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest mt-1">Gerenciamento de voluntários interessados</p>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-xs font-mono hover:bg-white/10 transition-colors rounded-sm">
-          <Download className="w-4 h-4" /> EXPORTAR CSV
-        </button>
-      </div>
+    <div className="space-y-6">
+      <SectionHeader
+        title="Gestao de Leads"
+        subtitle="Pipeline de captacao, qualificacao e acompanhamento de voluntarios"
+        actions={
+          <>
+            <button
+              onClick={exportCsv}
+              className="h-10 px-4 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-sm inline-flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Exportar CSV
+            </button>
+            <button
+              onClick={() => setEditing({ ...emptyLead })}
+              className="h-10 px-4 rounded-sm bg-[#FFD600] text-black hover:bg-white font-semibold text-sm inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Novo lead
+            </button>
+          </>
+        }
+      />
 
-      {/* Filters & Search */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-[#0A0A0A] border border-white/10 p-4 rounded-sm">
-        <div className="flex items-center gap-4 flex-grow max-w-md">
-          <div className="relative flex-grow">
+      <Panel className="space-y-4">
+        <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+          <div className="relative w-full md:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-            <input 
-              type="text" 
-              placeholder="Buscar por nome ou e-mail..." 
-              className="w-full bg-black border border-white/10 pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#FFD600] rounded-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar por nome, email ou area"
+              className="w-full h-10 rounded-sm border border-white/10 bg-black/40 pl-9 pr-3 text-sm outline-none focus:border-[#FFD600]/60"
             />
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-black border border-white/10 rounded-sm">
-            <Filter className="w-4 h-4 text-zinc-500" />
-            <select 
-              className="bg-transparent text-xs font-mono focus:outline-none"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option>Todos</option>
-              <option>Novo</option>
-              <option>Em análise</option>
-              <option>Qualificado</option>
-              <option>Aprovado</option>
-              <option>Reprovado</option>
-            </select>
-          </div>
-        </div>
-        
-        <div className="text-xs font-mono text-zinc-500">
-          Mostrando {filteredLeads.length} de {mockLeads.length} registros
-        </div>
-      </div>
 
-      {/* Table */}
-      <div className="bg-[#0A0A0A] border border-white/10 rounded-sm overflow-hidden">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-white/10 text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-              <th className="px-6 py-4 font-normal">Candidato</th>
-              <th className="px-6 py-4 font-normal">Área / Nível</th>
-              <th className="px-6 py-4 font-normal">Data</th>
-              <th className="px-6 py-4 font-normal">Status</th>
-              <th className="px-6 py-4 font-normal text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {filteredLeads.map((lead) => (
-              <tr 
-                key={lead.id} 
-                className="group hover:bg-white/5 transition-colors cursor-pointer"
-                onClick={() => setSelectedLead(lead)}
-              >
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/5 rounded-sm flex items-center justify-center text-sm font-bold group-hover:bg-[#FFD600] group-hover:text-black transition-colors">
-                      {lead.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold group-hover:text-[#FFD600] transition-colors">{lead.name}</p>
-                      <p className="text-xs text-zinc-500">{lead.email}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <p className="text-sm text-zinc-300">{lead.area}</p>
-                  <p className="text-[10px] font-mono text-zinc-500 uppercase">{lead.experience}</p>
-                </td>
-                <td className="px-6 py-4 text-xs text-zinc-500 font-mono">
-                  {lead.date}
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`text-[9px] font-mono px-2 py-1 rounded-sm border ${
-                    lead.status === 'Novo' ? 'border-blue-500/30 text-blue-400 bg-blue-400/5' :
-                    lead.status === 'Em análise' ? 'border-yellow-500/30 text-yellow-400 bg-yellow-400/5' :
-                    lead.status === 'Qualificado' ? 'border-emerald-500/30 text-emerald-400 bg-emerald-400/5' :
-                    lead.status === 'Aprovado' ? 'border-purple-500/30 text-purple-400 bg-purple-400/5' :
-                    'border-zinc-500/30 text-zinc-400 bg-zinc-400/5'
-                  }`}>
-                    {lead.status.toUpperCase()}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <div className="flex justify-end gap-2">
-                    <button className="p-2 hover:bg-white/10 rounded-sm transition-colors text-zinc-500 hover:text-white">
-                      <Mail className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 hover:bg-white/10 rounded-sm transition-colors text-zinc-500 hover:text-[#FFD600]">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'todos' | LeadStatus)}
+            className="h-10 rounded-sm border border-white/10 bg-black/40 px-3 text-sm outline-none focus:border-[#FFD600]/60"
+          >
+            <option value="todos">Todos os status</option>
+            {statusOptions.map((status) => (
+              <option key={status} value={status}>
+                {status.replace('_', ' ')}
+              </option>
             ))}
-          </tbody>
-        </table>
-        
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-white/10 flex items-center justify-between">
-          <p className="text-xs text-zinc-500 font-mono">PÁGINA 1 DE 1</p>
-          <div className="flex gap-2">
-            <button className="p-2 border border-white/10 rounded-sm text-zinc-500 disabled:opacity-50" disabled>
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button className="p-2 border border-white/10 rounded-sm text-zinc-500 disabled:opacity-50" disabled>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          </select>
         </div>
-      </div>
 
-      {/* Lead Detail Modal */}
-      <AnimatePresence>
-        {selectedLead && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedLead(null)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl bg-[#0A0A0A] border border-white/10 rounded-sm overflow-hidden flex flex-col max-h-[90vh]"
-            >
-              <div className="p-8 border-b border-white/10 flex justify-between items-start">
-                <div className="flex gap-6">
-                  <div className="w-20 h-20 bg-[#FFD600] text-black flex items-center justify-center text-3xl font-bold rounded-sm">
-                    {selectedLead.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-display font-bold">{selectedLead.name}</h2>
-                    <p className="text-zinc-400">{selectedLead.email}</p>
-                    <div className="flex gap-3 mt-4">
-                      <a href="#" className="text-zinc-500 hover:text-white transition-colors"><Linkedin className="w-5 h-5" /></a>
-                      <a href="#" className="text-zinc-500 hover:text-white transition-colors"><Github className="w-5 h-5" /></a>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setSelectedLead(null)}
-                  className="p-2 hover:bg-white/5 rounded-sm transition-colors"
-                >
-                  <XCircle className="w-6 h-6 text-zinc-500" />
-                </button>
-              </div>
-
-              <div className="p-8 overflow-y-auto flex-grow space-y-8">
-                <div className="grid grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-2">Informações Básicas</h4>
-                    <div className="space-y-4">
+        {leads.length === 0 ? (
+          <EmptyState
+            title="Nenhum lead encontrado"
+            description="Ajuste os filtros ou cadastre um novo lead para iniciar o pipeline."
+          />
+        ) : (
+          <div className="overflow-auto">
+            <table className="w-full min-w-[980px] text-sm">
+              <thead>
+                <tr className="text-left text-[11px] uppercase tracking-widest text-zinc-500 border-b border-white/10">
+                  <th className="py-3 pr-3">Lead</th>
+                  <th className="py-3 pr-3">Area</th>
+                  <th className="py-3 pr-3">Tecnologias</th>
+                  <th className="py-3 pr-3">Nivel</th>
+                  <th className="py-3 pr-3">Status</th>
+                  <th className="py-3 pr-3">Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leads.map((lead) => (
+                  <tr key={lead.id} className="border-b border-white/5 hover:bg-white/[0.03] transition-colors">
+                    <td className="py-3 pr-3">
                       <div>
-                        <p className="text-xs text-zinc-500 mb-1">Área de Atuação</p>
-                        <p className="text-sm font-bold">{selectedLead.area}</p>
+                        <p className="font-medium">{lead.name}</p>
+                        <p className="text-zinc-500 text-xs">{lead.email} • {lead.city}</p>
                       </div>
-                      <div>
-                        <p className="text-xs text-zinc-500 mb-1">Nível de Experiência</p>
-                        <p className="text-sm font-bold">{selectedLead.experience}</p>
+                    </td>
+                    <td className="py-3 pr-3 text-zinc-300">{lead.area}</td>
+                    <td className="py-3 pr-3 text-zinc-300">{lead.technologies.join(', ')}</td>
+                    <td className="py-3 pr-3 text-zinc-300">{lead.experienceLevel}</td>
+                    <td className="py-3 pr-3">
+                      <div className="flex items-center gap-2">
+                        <LeadStatusBadge status={lead.status} />
+                        <select
+                          value={lead.status}
+                          onChange={(e) => updateLeadStatus(lead.id, e.target.value as LeadStatus)}
+                          className="h-8 rounded-sm border border-white/10 bg-black/40 px-2 text-xs"
+                        >
+                          {statusOptions.map((status) => (
+                            <option key={status} value={status}>
+                              {status.replace('_', ' ')}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                      <div>
-                        <p className="text-xs text-zinc-500 mb-1">Localização</p>
-                        <p className="text-sm font-bold">{selectedLead.city}</p>
+                    </td>
+                    <td className="py-3 pr-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setEditing(lead)}
+                          className="h-8 w-8 inline-flex items-center justify-center rounded-sm border border-white/10 hover:bg-white/10"
+                          aria-label="Editar lead"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteLead(lead.id)}
+                          className="h-8 w-8 inline-flex items-center justify-center rounded-sm border border-white/10 hover:bg-rose-500/20 hover:text-rose-300"
+                          aria-label="Remover lead"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-2">Status do Processo</h4>
-                    <div className="p-4 bg-white/5 border border-white/10 rounded-sm">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Clock className="w-4 h-4 text-[#FFD600]" />
-                        <span className="text-sm font-bold">{selectedLead.status}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button className="py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono hover:bg-emerald-500/20 transition-all rounded-sm">QUALIFICAR</button>
-                        <button className="py-2 bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-mono hover:bg-red-500/20 transition-all rounded-sm">REPROVAR</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-4">Stack Tecnológico</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedLead.techs.map((tech: string, i: number) => (
-                      <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 text-zinc-300 text-xs font-mono">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-2">Motivação</h4>
-                  <p className="text-sm text-zinc-300 leading-relaxed italic">
-                    &quot;{selectedLead.motivation}&quot;
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-6 border-t border-white/10 bg-[#050505] flex justify-between items-center">
-                <p className="text-[10px] font-mono text-zinc-500">RECEBIDO EM {selectedLead.date}</p>
-                <div className="flex gap-4">
-                  <button className="px-6 py-2 border border-white/10 text-xs font-mono hover:bg-white/5 transition-all rounded-sm">ARQUIVAR</button>
-                  <button className="px-6 py-2 bg-[#FFD600] text-black font-bold text-xs font-mono hover:bg-[#FFD600]/90 transition-all rounded-sm">INICIAR CONTATO</button>
-                </div>
-              </div>
-            </motion.div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
+      </Panel>
+
+      <AnimatePresence>
+        {editing ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80]"
+          >
+            <button className="absolute inset-0 bg-black/75" onClick={() => setEditing(null)} />
+            <motion.div
+              initial={{ opacity: 0, y: 16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.98 }}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(760px,92vw)] rounded-sm border border-white/10 bg-[#0A0A0A] p-5"
+            >
+              <h3 className="text-lg font-semibold mb-4">{editing.id ? 'Editar lead' : 'Novo lead'}</h3>
+              <form
+                className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  upsertLead({
+                    ...editing,
+                    technologies: typeof editing.technologies === 'string'
+                      ? editing.technologies.split(',').map((item) => item.trim()).filter(Boolean)
+                      : editing.technologies,
+                  });
+                  setEditing(null);
+                }}
+              >
+                {[
+                  { key: 'name', label: 'Nome', type: 'text' },
+                  { key: 'email', label: 'Email', type: 'email' },
+                  { key: 'city', label: 'Cidade', type: 'text' },
+                  { key: 'area', label: 'Area de atuacao', type: 'text' },
+                  { key: 'experienceLevel', label: 'Nivel de experiencia', type: 'text' },
+                  { key: 'availability', label: 'Disponibilidade', type: 'text' },
+                  { key: 'github', label: 'GitHub', type: 'url' },
+                  { key: 'linkedin', label: 'LinkedIn', type: 'url' },
+                ].map((field) => (
+                  <label key={field.key} className="space-y-1 block">
+                    <span className="text-xs text-zinc-500">{field.label}</span>
+                    <input
+                      type={field.type}
+                      value={String((editing as any)[field.key] ?? '')}
+                      onChange={(e) => setEditing((prev) => ({ ...(prev || {}), [field.key]: e.target.value }))}
+                      className="w-full h-10 rounded-sm border border-white/10 bg-black/40 px-3 text-sm outline-none focus:border-[#FFD600]/60"
+                    />
+                  </label>
+                ))}
+
+                <label className="space-y-1 block md:col-span-2">
+                  <span className="text-xs text-zinc-500">Tecnologias (separadas por virgula)</span>
+                  <input
+                    type="text"
+                    value={Array.isArray(editing.technologies) ? editing.technologies.join(', ') : (editing.technologies as any) || ''}
+                    onChange={(e) => setEditing((prev) => ({ ...(prev || {}), technologies: e.target.value }))}
+                    className="w-full h-10 rounded-sm border border-white/10 bg-black/40 px-3 text-sm outline-none focus:border-[#FFD600]/60"
+                  />
+                </label>
+
+                <label className="space-y-1 block md:col-span-2">
+                  <span className="text-xs text-zinc-500">Motivacao</span>
+                  <textarea
+                    rows={3}
+                    value={editing.motivation || ''}
+                    onChange={(e) => setEditing((prev) => ({ ...(prev || {}), motivation: e.target.value }))}
+                    className="w-full rounded-sm border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[#FFD600]/60"
+                  />
+                </label>
+
+                <label className="space-y-1 block md:col-span-2">
+                  <span className="text-xs text-zinc-500">Observacoes internas</span>
+                  <textarea
+                    rows={2}
+                    value={editing.notes || ''}
+                    onChange={(e) => setEditing((prev) => ({ ...(prev || {}), notes: e.target.value }))}
+                    className="w-full rounded-sm border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-[#FFD600]/60"
+                  />
+                </label>
+
+                <div className="md:col-span-2 flex justify-end gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(null)}
+                    className="h-10 px-4 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  <button type="submit" className="h-10 px-4 rounded-sm bg-[#FFD600] text-black hover:bg-white font-semibold text-sm">
+                    Salvar lead
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
     </div>
   );
 }
+

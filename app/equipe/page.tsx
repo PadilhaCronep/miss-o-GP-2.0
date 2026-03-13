@@ -1,161 +1,167 @@
+﻿'use client';
+
 import Link from 'next/link';
+import { motion } from 'motion/react';
+import {
+  ArrowRight,
+  Code2,
+  Database,
+  Github,
+  Instagram,
+  Layout,
+  Linkedin,
+  Shield,
+  Terminal,
+  Zap,
+} from 'lucide-react';
 import { team } from '@/lib/data';
-import { ArrowRight, Code2, Terminal, Zap, Shield, Database, Layout, Github, Linkedin, Instagram } from 'lucide-react';
-import * as motion from 'motion/react-client';
+import { InteractiveCard } from '@/components/ui/interactive-card';
 
 export default function EquipePage() {
-  // Helper to get an icon based on area
   const getAreaIcon = (area: string) => {
-    const a = area.toLowerCase();
-    if (a.includes('front') || a.includes('ui') || a.includes('produto')) return <Layout className="w-5 h-5 text-[#FFD600]" />;
-    if (a.includes('back') || a.includes('dados')) return <Database className="w-5 h-5 text-[#FFD600]" />;
-    if (a.includes('infra') || a.includes('devops') || a.includes('cyber')) return <Shield className="w-5 h-5 text-[#FFD600]" />;
-    if (a.includes('fullstack')) return <Code2 className="w-5 h-5 text-[#FFD600]" />;
+    const text = area.toLowerCase();
+    if (text.includes('front') || text.includes('ui') || text.includes('produto')) {
+      return <Layout className="w-5 h-5 text-[#FFD600]" />;
+    }
+    if (text.includes('back') || text.includes('dados')) {
+      return <Database className="w-5 h-5 text-[#FFD600]" />;
+    }
+    if (text.includes('infra') || text.includes('devops') || text.includes('cyber')) {
+      return <Shield className="w-5 h-5 text-[#FFD600]" />;
+    }
+    if (text.includes('fullstack')) {
+      return <Code2 className="w-5 h-5 text-[#FFD600]" />;
+    }
     return <Terminal className="w-5 h-5 text-[#FFD600]" />;
   };
 
   return (
-    <div className="pt-32 pb-24 min-h-screen bg-[#050505]">
-      {/* Header Section */}
-      <section className="relative pb-24 border-b border-white/10 overflow-hidden">
+    <div className="pt-28 pb-24 min-h-screen bg-[#050505]">
+      <section className="relative pb-16 md:pb-24 border-b border-white/10 overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay z-0" />
-        <div className="absolute top-0 right-1/4 w-[600px] h-[300px] bg-[#FFD600]/5 blur-[100px] rounded-full pointer-events-none" />
-        
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+        <div className="absolute top-0 right-1/4 w-[640px] h-[360px] bg-[#FFD600]/8 blur-[120px] rounded-full pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#FFD600]/30 bg-[#FFD600]/10 text-[#FFD600] text-xs font-mono mb-8"
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-sm border border-[#FFD600]/30 bg-[#FFD600]/10 text-[#FFD600] text-xs font-mono uppercase tracking-wider mb-6"
           >
-            <span className="w-2 h-2 rounded-full bg-[#FFD600] animate-pulse" />
-            HUMAN_RESOURCES // ACTIVE
-          </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
+            Team Intelligence
+          </motion.p>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-display font-bold mb-8 leading-tight"
+            transition={{ duration: 0.45, delay: 0.05 }}
+            className="text-4xl md:text-6xl font-display font-bold leading-tight mb-5"
           >
-            Os talentos por trás <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFD600] to-[#FFEA00]">do código.</span>
+            Pessoas que constroem
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFD600] to-[#FFEA00]">
+              tecnologia politica real.
+            </span>
           </motion.h1>
-          
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
+
+          <motion.p
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl text-zinc-400 max-w-2xl font-light leading-relaxed"
+            transition={{ duration: 0.45, delay: 0.12 }}
+            className="text-zinc-400 max-w-3xl text-lg"
           >
-            Uma equipe multidisciplinar de desenvolvedores, designers e engenheiros focados em construir a próxima geração de ferramentas para a política brasileira.
+            Equipe multidisciplinar com foco em produto, dados, engenharia e operacao institucional.
           </motion.p>
         </div>
       </section>
 
-      {/* Team Grid */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <section className="py-14 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
             {team.map((member, index) => (
               <motion.div
                 key={member.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
+                viewport={{ once: true, margin: '-20px' }}
+                transition={{ duration: 0.28, delay: index * 0.04 }}
               >
-                <Link 
-                  href={`/equipe/${member.id}`} 
-                  className="group block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD600] rounded-sm"
-                >
-                  <div className="bg-[#111] border border-white/10 p-8 hover:border-[#FFD600]/50 transition-all duration-300 h-full flex flex-col relative overflow-hidden rounded-sm">
-                    {/* Hover Gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#FFD600]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    
-                    {/* Avatar & Icon */}
-                    <div className="flex justify-between items-start mb-8 relative z-10">
-                      <div className="w-16 h-16 bg-zinc-900 border border-white/10 flex items-center justify-center text-2xl font-display font-bold text-zinc-500 group-hover:bg-[#FFD600] group-hover:text-black group-hover:border-[#FFD600] transition-colors" aria-hidden="true">
+                <InteractiveCard className="h-full">
+                  <article className="h-full rounded-sm border border-white/10 bg-[#111] p-5 md:p-6 hover:border-[#FFD600]/50 transition-colors flex flex-col">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="h-14 w-14 rounded-sm border border-white/10 bg-zinc-900 text-zinc-400 grid place-items-center text-2xl font-display font-bold">
                         {member.name.charAt(0)}
                       </div>
-                      <div className="p-2 bg-white/5 border border-white/10 rounded-sm" aria-hidden="true">
+                      <div className="h-9 w-9 rounded-sm border border-white/10 bg-white/5 grid place-items-center">
                         {getAreaIcon(member.area)}
                       </div>
                     </div>
-                    
-                    {/* Info */}
-                    <div className="relative z-10 flex-grow">
-                      <h3 className="text-2xl font-display font-bold mb-2 group-hover:text-[#FFD600] transition-colors">{member.name}</h3>
-                      <p className="text-[#FFD600] text-xs font-mono uppercase tracking-wider mb-4">{member.role}</p>
-                      
-                      <p className="text-zinc-400 text-sm leading-relaxed mb-6 line-clamp-3">
-                        {member.bio}
-                      </p>
 
-                      {/* Social Links */}
-                      <div className="flex gap-4 mb-6">
-                        {member.links?.github && (
-                          <a href={member.links.github} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" onClick={(e) => e.stopPropagation()}>
-                            <Github className="w-4 h-4" />
-                          </a>
-                        )}
-                        {member.links?.linkedin && (
-                          <a href={member.links.linkedin} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" onClick={(e) => e.stopPropagation()}>
-                            <Linkedin className="w-4 h-4" />
-                          </a>
-                        )}
-                        {member.links?.instagram && (
-                          <a href={member.links.instagram} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" onClick={(e) => e.stopPropagation()}>
-                            <Instagram className="w-4 h-4" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Footer: Badges & CTA */}
-                    <div className="mt-auto pt-6 border-t border-white/10 relative z-10">
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {member.badges.slice(0, 2).map((badge, i) => (
-                          <span key={i} className="px-2 py-1 bg-white/5 text-zinc-300 text-[9px] font-mono uppercase tracking-wider border border-white/10">
-                            {badge}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono text-zinc-500">
-                          {member.hours}H CONTRIBUÍDAS
+                    <h2 className="text-xl font-display font-bold">{member.name}</h2>
+                    <p className="text-xs uppercase tracking-wider text-[#FFD600] font-mono mt-1">{member.role}</p>
+                    <p className="mt-4 text-sm text-zinc-400 leading-relaxed line-clamp-3">{member.bio}</p>
+
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {member.badges.slice(0, 3).map((badge) => (
+                        <span key={badge} className="px-2 py-1 rounded-sm border border-white/10 bg-white/5 text-[10px] uppercase tracking-wider text-zinc-300 font-mono">
+                          {badge}
                         </span>
-                        <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-[#FFD600] transition-colors -translate-x-2 group-hover:translate-x-0 opacity-0 group-hover:opacity-100" aria-hidden="true" />
-                      </div>
+                      ))}
                     </div>
-                  </div>
-                </Link>
+
+                    <div className="mt-4 flex items-center gap-3 text-zinc-500">
+                      {member.links?.github ? (
+                        <a href={member.links.github} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+                          <Github className="w-4 h-4" />
+                        </a>
+                      ) : null}
+                      {member.links?.linkedin ? (
+                        <a href={member.links.linkedin} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+                          <Linkedin className="w-4 h-4" />
+                        </a>
+                      ) : null}
+                      {member.links?.instagram ? (
+                        <a href={member.links.instagram} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+                          <Instagram className="w-4 h-4" />
+                        </a>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
+                      <span className="text-xs font-mono text-zinc-500">{member.hours}h dedicadas</span>
+                      <Link
+                        href={`/equipe/${member.id}`}
+                        className="inline-flex items-center gap-1 text-xs text-[#FFD600] hover:text-white transition-colors"
+                      >
+                        Ver perfil <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </article>
+                </InteractiveCard>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
-      
-      {/* Join CTA */}
-      <section className="py-24 border-t border-white/10 bg-[#0A0A0A]">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+
+      <section className="py-16 border-t border-white/10 bg-[#0A0A0A]">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           className="max-w-4xl mx-auto px-6 text-center"
         >
-          <Zap className="w-12 h-12 text-[#FFD600] mx-auto mb-8" aria-hidden="true" />
-          <h2 className="text-4xl font-display font-bold mb-6">Quer fazer parte desse time?</h2>
-          <p className="text-zinc-400 mb-10 max-w-2xl mx-auto">
-            Buscamos mentes inquietas que queiram aplicar tecnologia para resolver problemas reais da política.
+          <Zap className="w-10 h-10 text-[#FFD600] mx-auto mb-6" aria-hidden="true" />
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Quer construir com a gente?</h2>
+          <p className="text-zinc-400 mb-8 max-w-2xl mx-auto">
+            Estamos recrutando pessoas de engenharia, dados, design e operacao para projetos de impacto publico.
           </p>
-          <Link 
-            href="/participe" 
-            className="inline-flex h-14 px-8 bg-[#FFD600] text-black font-bold rounded-sm items-center gap-2 hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+          <Link
+            href="/participe"
+            className="inline-flex h-12 px-6 bg-[#FFD600] text-black font-semibold rounded-sm items-center gap-2 hover:bg-white transition-colors"
           >
-            Ver Vagas Abertas <ArrowRight className="w-5 h-5" aria-hidden="true" />
+            Ver vagas abertas <ArrowRight className="w-4 h-4" />
           </Link>
         </motion.div>
       </section>
